@@ -1,12 +1,16 @@
 import ollama
 import json
 import subprocess
+import pyautogui
+import time
+import pygetwindow as gw
 
 SYSTEM_PROMPT = """You are a command interpreter. You ONLY respond with valid JSON, nothing else.
 Available tools:
 - open_app(name): opens an application
 - close_app(name): closes an application
 - list_files(path): lists files in a folder
+- type_text(content): types text into the currently open app
 
 Respond ONLY in this exact format:
 {"tool": "tool_name", "arg": "value"}
@@ -72,6 +76,21 @@ def execute(parsed):
                     print("     -", f)
             except FileNotFoundError:
                 print(f"   ERROR: '{path}' nahi mila.")
+        else:
+            print("   CANCELLED by user.")
+
+    elif tool == "type_text":
+        windows = gw.getWindowsWithTitle("Notepad")
+        if not windows:
+            print("   ERROR: Notepad khula hua nahi mila. Pehle 'open notepad' chalao.")
+            return
+        confirm = input(f"   Ye type karun: '{arg}'? (Y/N): ")
+        if confirm.strip().lower() == "y":
+            notepad_window = windows[0]
+            notepad_window.activate()
+            time.sleep(0.5)
+            pyautogui.write(arg, interval=0.03)
+            print("   DONE: text Notepad mein type ho gaya.")
         else:
             print("   CANCELLED by user.")
 
